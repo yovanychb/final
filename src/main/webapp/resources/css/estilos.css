@@ -1,0 +1,27 @@
+.fondoOrden{
+    background-color: #c0a16b;
+}
+.datos{
+    padding-top: 2%;
+}
+
+.orden{
+    font-size: 30px;
+}
+
+.fondoProducto{
+    background-color: #ddbc95;
+}
+
+.title{
+    background-color: #b38867
+}
+.columna{
+    padding-left: 5%;
+    padding-top: 5%;
+    float: left;
+}
+.qq{
+    color: black;
+}
+

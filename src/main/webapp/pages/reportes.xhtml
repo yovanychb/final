@@ -1,0 +1,148 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <h:head>
+        <meta content='text/html; charset=UTF-8' http-equiv="Content-Type"/>
+        <link href="../resources/css/estilos.css" rel="stylesheet" type="text/css" media="all" />
+        <link rel="stylesheet" href="../resources/font-awesome/css/font-awesome.min.css" type="text/css" media="all" />
+        <link rel="stylesheet" href="../resources/bootstrap/css/bootstrap.min.css" type="text/css" media="all" />
+        <link rel="stylesheet" href="../resources/css/style.default.css" type="text/css" media="all"/>
+        <link rel="stylesheet" href="../resources/css/custom.css" type="text/css" media="all" />
+        <link rel="stylesheet" href="../resources/css/inicio.css" type="text/css" media="all" />
+    </h:head>
+    <h:body class="fondoOrden">
+        <f:view>
+            <br></br>
+            <p:menubar style="font-size: larger; height: 60px;width: 98%;left: 1%">
+                <p:menuitem value=" Home" icon="ui-icon-home" url="../inicio.html"/>
+            </p:menubar>
+            <p:spacer/>
+            <h:form id="form" style="position: absolute; left: 15%; top:15%;right: 15%; width: 70%;height: 50%">
+                <div>
+                    <h:panelGrid columns="2" style="margin-bottom:10px" cellpadding="10">
+                        <p:outputLabel for="tipo" value="Elija el tipo de reporte:" styleClass="qq"/>
+                        <p:selectOneMenu id="tipo" value="#{frmReportes.tipo}">
+                            <p:ajax event="valueChange" process="@this" listener="#{frmReportes.elegirTipo()}" update="form"/>
+                            <f:selectItem itemLabel="" itemValue="" />
+                            <f:selectItem itemLabel="Diario" itemValue="Diario" />
+                            <f:selectItem itemLabel="Mensual" itemValue="Mensual" />
+                            <f:selectItem itemLabel="Anual" itemValue="Anual" />
+                            <f:selectItem itemLabel="Rango" itemValue="Rango" />
+                        </p:selectOneMenu>
+                    </h:panelGrid>
+                </div>
+                <!--</h:form >
+                <h:form id="reports" style="position: absolute; left: 15%; top:20%;right: 15%; width: 70%;height: 50%">
+                --><p:panelGrid columns="2">
+                    <p:outputLabel for="diario" value="Seleccione el dia: " rendered="#{frmReportes.diario}"/>
+                    <p:calendar id="diario" value="#{frmReportes.dia}" 
+                                showOn="both" rendered="#{frmReportes.diario}" 
+                                pattern="dd-MM-yyyy" readonlyInput="true">
+                        <p:ajax event="dateSelect" listener="#{frmReportes.reporteDiario()}" update="form"/>
+                    </p:calendar>
+                </p:panelGrid>
+
+                <p:panelGrid columns="4">
+                    <p:outputLabel for="mes" value="Seleccione el mes: " rendered="#{frmReportes.mensual}"/>
+                    <p:selectOneMenu id="mes" value="#{frmReportes.mes}" rendered="#{frmReportes.mensual}">
+                        <p:ajax event="valueChange" process="@this" listener="#{frmReportes.reporteMensual()}" update="form"/>                    
+                        <f:selectItem itemLabel="" itemValue="" />
+                        <f:selectItem itemLabel="Enero" itemValue="01" />
+                        <f:selectItem itemLabel="Febrero" itemValue="02" />
+                        <f:selectItem itemLabel="Marzo" itemValue="03" />
+                        <f:selectItem itemLabel="Abril" itemValue="04" />
+                        <f:selectItem itemLabel="Mayo" itemValue="05" />
+                        <f:selectItem itemLabel="Junio" itemValue="06" />
+                        <f:selectItem itemLabel="Julio" itemValue="07" />
+                        <f:selectItem itemLabel="Agosto" itemValue="08" />
+                        <f:selectItem itemLabel="Septiembre" itemValue="09" />
+                        <f:selectItem itemLabel="Octubre" itemValue="10" />
+                        <f:selectItem itemLabel="Noviembre" itemValue="11" />
+                        <f:selectItem itemLabel="Diciembre" itemValue="12" />
+                    </p:selectOneMenu>
+                    <p:outputLabel for="anio" value="Año: " rendered="#{frmReportes.mensual}"/>
+                    <p:selectOneMenu id="anio" value="#{frmReportes.anio}" rendered="#{frmReportes.mensual}">
+                        <p:ajax event="valueChange" process="@this" listener="#{frmReportes.reporteMensual()}" update="form"/>                    
+                        <f:selectItem itemLabel="2018" itemValue="2018" />
+                        <f:selectItem itemLabel="2019" itemValue="2019" />
+                        <f:selectItem itemLabel="2020" itemValue="2020" />
+                        <f:selectItem itemLabel="2021" itemValue="2021" />
+                        <f:selectItem itemLabel="2022" itemValue="2022" />
+                    </p:selectOneMenu>
+                </p:panelGrid>
+
+                <p:panelGrid columns="2">
+                    <p:outputLabel for="anio2" value="Seleccione el Año: " rendered="#{frmReportes.anual}"/>
+                    <p:selectOneMenu id="anio2" value="#{frmReportes.anio}" rendered="#{frmReportes.anual}">
+                        <p:ajax event="valueChange" process="@this" listener="#{frmReportes.reporteAnual()}" update="form"/>                    
+                        <f:selectItem itemLabel="" itemValue="" />
+                        <f:selectItem itemLabel="2018" itemValue="2018" />
+                        <f:selectItem itemLabel="2019" itemValue="2019" />
+                        <f:selectItem itemLabel="2020" itemValue="2020" />
+                        <f:selectItem itemLabel="2021" itemValue="2021" />
+                        <f:selectItem itemLabel="2022" itemValue="2022" />
+                    </p:selectOneMenu>
+                </p:panelGrid>
+
+                <p:panelGrid columns="4">
+                    <p:outputLabel for="fechaInicio" value="Fecha Inicial: " rendered="#{frmReportes.rango}"/>
+                    <p:calendar id="fechaInicio" value="#{frmReportes.inicio}" 
+                                showOn="both" rendered="#{frmReportes.rango}" 
+                                pattern="dd-MM-yyyy" readonlyInput="true"
+                                maxdate="#{frmReportes.fin}">
+                        <p:ajax event="dateSelect" listener="#{frmReportes.reporteRango()}" update="form"/>
+                    </p:calendar>
+                    <p:outputLabel for="fechaFin" value="Fecha Final " rendered="#{frmReportes.rango}"/>
+                    <p:calendar id="fechaFin" value="#{frmReportes.fin}" 
+                                showOn="both" rendered="#{frmReportes.rango}" 
+                                pattern="dd-MM-yyyy" readonlyInput="true"
+                                mindate="#{frmReportes.inicio}">
+                        <p:ajax event="dateSelect" listener="#{frmReportes.reporteRango()}" update="form"/>
+                    </p:calendar>
+                </p:panelGrid>
+
+                <p:spacer height="20px"/>
+                <p:dataTable id="repots"
+                             var="reportes" 
+                             value="#{frmReportes.ordenes}" 
+                             scrollable="true"
+                             emptyMessage="No existe registro"
+                             rowKey="#{frmReportes.orden.idOrden}"
+                             style="padding-bottom: 2%"
+                             sortBy="#{reportes.fecha}">
+
+
+                    <f:facet name="header" >
+                        <p:outputPanel style="padding: 0.5%">
+                            <h:outputText value="Reporte" style="font-size: larger"/> 
+                        </p:outputPanel>
+                    </f:facet>
+                    <p:column headerText="Fecha">
+                        <h:outputText value="#{reportes.fecha}">
+                            <f:convertDateTime pattern="dd-MM-yyyy hh:mm a" timeZone="CST"/>
+                        </h:outputText>
+                    </p:column>
+                    <p:column headerText="Numero de Orden" >
+                        <h:outputText value="#{reportes.idOrden}" />
+                    </p:column>
+                    <p:column headerText="Total de Orden">
+                        <h:outputText value="#{reportes.total}" >
+                            <f:convertNumber type="currency" currencySymbol="$ "/>
+                        </h:outputText>
+                    </p:column>
+                    <f:facet name="footer" >
+                        <p:outputPanel style="text-align: right" >
+                            <h:outputText value="Venta Total: $ #{frmReportes.total}" />
+                        </p:outputPanel>
+                    </f:facet>
+                </p:dataTable>
+                <div align="right" style="padding-right: 0%; margin-top: -1%">
+                    <p:commandButton value="Regresar" actionListener="#{frmReportes.undirect()}" icon="ui-icon-close"/>
+                </div>
+            </h:form>    
+        </f:view>
+    </h:body>
+</html>
+

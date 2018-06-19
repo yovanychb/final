@@ -1,0 +1,213 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+    <h:head>
+        <title>ResBar</title>
+        <meta content='text/html; charset=UTF-8' http-equiv="Content-Type"/>
+        <link href="../resources/css/estilos.css" rel="stylesheet" type="text/css" media="all" />
+        <link rel="stylesheet" href="../resources/font-awesome/css/font-awesome.min.css" type="text/css" media="all" />
+        <link rel="stylesheet" href="../resources/bootstrap/css/bootstrap.min.css" type="text/css" media="all" />
+        <link rel="stylesheet" href="../resources/css/style.default.css" type="text/css" media="all"/>
+        <link rel="stylesheet" href="../resources/css/custom.css" type="text/css" media="all" />
+        <link rel="stylesheet" href="../resources/css/inicio.css" type="text/css" media="all" />
+    </h:head>
+    <h:body  class="fondoOrden">
+        <f:view>
+
+            <!-- Informacion de la orden -->
+
+            <h:form id="form">
+                <p:spacer/>
+                <p:menubar style="font-size: larger; height: 60px;width: 98%;left: 1%">
+                    <p:menuitem value=" Dashboard" icon="ui-icon-triangle-1-w" url="../index.jsf"/>
+                </p:menubar>
+                <p:spacer/> 
+                <p:growl id="messages" showDetail="true"/>
+                <div class="columna">
+                    <h:panelGrid id="grid" columns="2" class="datos" style="padding-left: 5%">
+                        <p:outputLabel  for="mesa" value="Mesa: " class="qq"/>
+                        <p:inputText id="mesa" value="#{frmOrden.orden.mesa}"/>
+
+                        <p:outputLabel  for="mesero" value="Mesero: " class="qq"/>
+                        <p:inputText id="mesero" value="#{frmOrden.orden.mesero}"/>
+
+                        <p:outputLabel  for="cliente" value="Cliente:" class="qq"/>
+                        <p:inputText  id="cliente"  value="#{frmOrden.orden.cliente}" />
+
+                        <p:outputLabel  for="comentario" value="Comentario:" class="qq"/>
+                        <p:inputTextarea  id="comentario"  value="#{frmOrden.orden.comentario}"/>
+
+                        <p:outputLabel  for="fecha" value="Fecha:" class="qq"/>
+                        <p:outputLabel id="fecha" value="#{frmOrden.fecha()}" class="qq"/>
+
+                        <p:outputLabel  for="hora" value="Hora:" class="qq"/>
+                        <p:outputLabel id="hora" value="#{frmOrden.hora()}" class="qq"/>
+
+                    </h:panelGrid>
+                </div>
+                <div style="position: absolute; right: 74%; top: 52%">
+                    <p:commandButton class="boton" value="Agregar Productos" oncomplete="PF('Add').show()" icon="ui-icon-plusthick" >
+                        <p:ajax listener="#{frmOrden.crear()}" update=":menu :frmProductos"></p:ajax>
+                    </p:commandButton>
+                </div>
+                <!--</h:form>
+    
+                Productos de la orden 
+    
+                <h:form id="form" style="padding-top: 1%"> -->
+                <div style="height: 300px">
+                    <p:dataTable id="detalleOrden"
+                                 var="producto" 
+                                 value="#{frmOrden.detalle}" 
+                                 widgetVar="tblOrdenes"
+                                 emptyMessage="No se encontraron ordenes activas"
+                                 selectionMode="single"
+                                 sortBy="#{producto.producto.idProducto}"
+                                 selection="#{frmOrden.detail}"
+                                 rowKey="#{producto.producto.idProducto}"
+                                 style="width: 95%; padding-left: 35%;padding-top: 1.5%; padding-bottom: 2%;">
+
+                        <f:facet name="header">
+                            <h:outputText value="Productos de la orden"/>                                  
+                        </f:facet>
+                        <p:column headerText="Producto">
+                            <h:outputText value="#{producto.producto.nombre}"/>
+                        </p:column>
+                        <p:column headerText="Cantidad">
+                            <p:commandButton value="-">
+                                <p:ajax listener="#{frmOrden.quitarProductosDetalle(producto)}" update=":form"/>
+                            </p:commandButton>
+                            <p:spacer/>
+                            <h:outputText id="cantidad" value="#{producto.cantidad}"/>
+                            <p:spacer/>
+                            <p:commandButton value="+">
+                                <p:ajax listener="#{frmOrden.agregarProductosDetalle(producto)}" update=":form"/>
+                            </p:commandButton>                        
+                        </p:column>
+
+                        <p:column headerText="Total" style="width: 15%">
+                            <h:outputText value="#{producto.producto.precio*producto.cantidad}" >
+                                <f:convertNumber currencySymbol="$" type="currency" />
+                            </h:outputText> 
+                        </p:column> 
+                        <p:column headerText="" style="width: 17%">
+                            <p:commandButton value="Eliminar">
+                                <p:ajax listener="#{frmOrden.quitarCompleto(producto)}" update=":form"/>
+                            </p:commandButton>
+                        </p:column>
+                        <f:facet name="footer" >
+                            <p:outputPanel style="text-align: right" >
+                                <h:outputText value="Total: $ #{frmOrden.orden.total}" />
+                            </p:outputPanel>
+                        </f:facet>
+                    </p:dataTable>
+
+                    <div >
+                        <div align="right" style="position: relative;  margin-left:35%; border: 2px solid #654b24; border-radius: 25px; width: 620px; height: 50px">
+                            <p:commandButton  value="Cancelar" icon="ui-icon-close" style="margin-right: 100px; margin-top: 4px" >
+                                <p:ajax listener="#{frmOrden.dashboard()}"/>
+                            </p:commandButton>
+                            <p:commandButton value="Agregar Orden" icon="ui-icon-check" style="margin-right: 100px; margin-top: 4px">
+                                <p:ajax process="@this" listener="#{frmOrden.agregarNueva()}" update="messages"/>
+                            </p:commandButton>
+
+                        </div>
+                    </div>
+                </div>
+            </h:form>
+        </f:view>
+
+
+        <p:dialog header="Agregar Prductos"
+                  position="center"
+                  widgetVar="Add" 
+                  modal="true" 
+                  showEffect="fade" 
+                  hideEffect="fade" 
+                  resizable="false"
+                  width="100%"
+                  height="550"
+                  draggable="false">
+
+
+            <h:form id="menu" styleClass="frmMenu" >
+                <nav class="side-navbar">
+                    <div class="sidebar-header d-flex align-items-center">
+                        <div class="avatar"><img src="../resources/img/titulo.jpg" alt="..." class="img-fluid rounded-circle"/></div>
+                        <div class="title, titulo">
+                            <h1 class="h4">Fraga Caffe</h1>
+                        </div>
+                    </div>
+
+                    <p:dataTable value="#{frmOrden.categorias}" 
+                                 var="item"
+                                 selection="#{frmCategorias.categoria}"
+                                 selectionMode="single"
+                                 rowKey="#{item.idCategoria}"
+                                 >
+                        <p:ajax event="rowSelect" listener="#{frmOrden.onRowSelectCategoria}" update=":frmProductos"/>   
+
+                        <p:column headerText="CATEGORIAS">
+
+                            <li class="fa fa-cutlery espacio-icono"><h:outputText class="espacio-menu"  value="  #{item.nombre}"/></li>
+
+                        </p:column>
+                    </p:dataTable>
+
+
+                </nav>
+            </h:form>
+
+            <h:form id="frmProductos" styleClass="frmProductos">
+                <p:dataTable id="products"
+                             var="productos" 
+                             value="#{frmOrden.fake}" 
+                             widgetVar="tblProductos"
+                             scrollable="true"
+                             scrollHeight="400"
+                             emptyMessage="No se encontraron productos"
+                             selectionMode="single"
+                             selection="#{frmOrden.fakeel}"
+                             filteredValue="#{frmOrden.fake2}"
+                             rowKey="#{productos.producto.idProducto}"
+                             style="padding-bottom: 2%">
+
+                    <p:ajax event="rowSelect" listener="#{frmOrden.agregarProductos}" update=":frmProductos"/>
+
+                    <f:facet name="header">
+                        <p:outputPanel style="padding: 0.5%">
+                            <h:outputText value="Buscar Producto:  " />
+                            <p:inputText id="globalFilter" onkeyup="PF('tblProductos').filter()" style="width:20%" placeholder="Buscar producto..."/>
+                        </p:outputPanel>
+                    </f:facet>
+                    <p:column headerText="Nombre" filterBy="#{productos.producto.nombre}" filterStyle="display:none" filterMatchMode="exact">
+                        <h:outputText value="#{productos.producto.nombre}" />
+                    </p:column>
+                    <p:column headerText="Precio">
+                        <h:outputText value="#{productos.producto.precio}" />
+                    </p:column>
+                    <p:column headerText="Cantidad">
+                        <p:outputLabel id="cantidad" value="#{productos.cantidad}"/>
+                    </p:column>
+                    <p:column headerText="" style="width: 17%">
+                        <p:commandButton value="-">
+                            <p:ajax listener="#{frmOrden.quitarProductos(productos)}" update=":frmProductos"/>
+                        </p:commandButton>
+                    </p:column>
+                </p:dataTable>
+                <div align="right" style="position: relative;  border: 2px solid #654b24; border-radius: 25px; width: 700px;">
+                    <p:panelGrid columns="3" style="background-color: #c0a16b; position: relative; margin-top: 1px; margin-right: 5%; width: 470px; padding-left: 5%">
+                        <p:commandButton value="Cancelar" oncomplete="PF('Add').hide()" icon="ui-icon-close" update="frmProductos"/>
+                        <p:commandButton value="Hecho" oncomplete="PF('Add').hide()" icon="ui-icon-check" update=":frmProductos :form">
+                            <p:ajax/>
+                        </p:commandButton>
+                    </p:panelGrid>
+                </div>
+            </h:form>
+        </p:dialog>
+    </h:body>
+</html>

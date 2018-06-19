@@ -1,0 +1,285 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+    <h:head>
+        <title>ResBar</title>
+        <meta content='text/html; charset=UTF-8' http-equiv="Content-Type"/>
+        <link href="../resources/css/estilos.css" rel="stylesheet" type="text/css" media="all" />
+        <link rel="stylesheet" href="../resources/font-awesome/css/font-awesome.min.css" type="text/css" media="all" />
+        <link rel="stylesheet" href="../resources/bootstrap/css/bootstrap.min.css" type="text/css" media="all" />
+        <link rel="stylesheet" href="../resources/css/style.default.css" type="text/css" media="all"/>
+        <link rel="stylesheet" href="../resources/css/custom.css" type="text/css" media="all" />
+        <link rel="stylesheet" href="../resources/css/inicio.css" type="text/css" media="all" />
+    </h:head>
+    <h:body class="fondoOrden">
+        <f:view>
+            <p:spacer/>
+            <h:form>    
+                <p:menubar style="font-size: larger; height: 60px;width: 98%;left: 1%">
+                    <p:menuitem value=" Home" icon="ui-icon-home" url="../inicio.html"/>
+                </p:menubar>
+            </h:form>
+            <p:spacer/>
+            <p:growl id="messages" showDetail="true"/>
+            <h:form id="menu" style="position: absolute; left: 5%; top: 15%;right: 70%; width: 8%" >
+                <nav class="side-navbar">
+                    <div class="sidebar-header d-flex align-items-center">
+                        <div class="avatar"><img src="../resources/img/titulo.jpg" alt="..." class="img-fluid rounded-circle"/></div>
+                        <div class="title, titulo">
+                            <h1 class="h4">Fraga Caffe</h1>
+                        </div>
+                    </div>
+                    <p:dataTable value="#{frmOrden.categorias}" 
+                                 var="item"
+                                 selection="#{frmCategorias.categoria}"
+                                 selectionMode="single"
+                                 rowKey="#{item.idCategoria}"
+                                 >
+                        <p:ajax event="rowSelect" listener="#{frmproductos.onRowSelectCategoria}" update=":form"/>   
+
+                        <p:column headerText="CATEGORIAS">
+                            <li class="fa fa-cutlery espacio-icono"><h:outputText class="espacio-menu"  value="#{item.nombre}"/></li>
+                        </p:column>
+                    </p:dataTable>
+                </nav>
+                <p:spacer/>
+                <p:commandButton style="width: 305%; height: 50px" value="Administrar Categorias" oncomplete="PF('Categorias').show()" update=":frmCate"/>
+            </h:form>
+
+            <h:form id="form" style="position: absolute; left: 31%; top:15%;right: 2%; width: 65%;height: 50%">
+                <p:dataTable id="products"
+                             widgetVar="tblProductos"
+                             var="productos" 
+                             value="#{frmproductos.productos}" 
+                             scrollable="true"
+                             scrollHeight="370"
+                             emptyMessage="No se encontraron productos"
+                             selectionMode="single"
+                             selection="#{frmproductos.producto}"
+                             filteredValue="#{frmproductos.filtroProd}"
+                             rowKey="#{productos.idProducto}"
+                             style="padding-bottom: 2%">
+
+                    <p:ajax event="rowSelect" listener="#{frmproductos.onRowSelect}" oncomplete="PF('EditProd').show()" update=":frmEditProd"/>
+
+                    <f:facet name="header">
+                        <p:outputPanel style="padding: 1%; border-bottom-style: dotted; text-align: start">
+                            <h:outputText value="Buscar Producto:  " />
+                            <p:inputText id="globalFilter" onkeyup="PF('tblProductos').filter()" style="width:20%" placeholder="Nombre del producto..."/>
+                        </p:outputPanel>
+                    </f:facet>
+                    <f:facet name="header" >
+                        <p:outputPanel style="padding: 0.5%">
+                            <h:outputText value="Productos Disponibles" style="font-size: larger"/> 
+                        </p:outputPanel>
+                    </f:facet>
+                    <p:column headerText="Nombre" filterBy="#{productos.nombre}" filterStyle="display:none" filterMatchMode="exact">
+                        <h:outputText value="#{productos.nombre}" />
+                    </p:column>
+                    <p:column headerText="Area" style="width: 20%">
+                        <h:outputText value="#{productos.area == 'C' ? 'COCINA' : 'BEBIDA'}" />
+                    </p:column>
+                    <p:column headerText="Precio" style="width: 20%">
+                        <h:outputText value="#{productos.precio}" >
+                            <f:convertNumber type="currency" currencySymbol="$" />
+                        </h:outputText>
+                    </p:column>
+
+                </p:dataTable>
+                <div align="right" style="position: relative;  margin-left:5%; border: 2px solid #654b24; border-radius: 25px; width: 630px; height: 50px">
+
+                    <p:spacer height="10px"/>
+                    <p:commandButton oncomplete="PF('Add').show()" value="Agregar Productos" icon="ui-icon-plus" style="position: relative; left: 1px; margin-top: 3px; margin-right: 180px">
+                        <p:ajax listener="#{frmproductos.nuevoProd()}" update="frmProd"/>
+                    </p:commandButton>
+
+                    <p:commandButton value="Hecho" actionListener="#{frmproductos.home()}" icon="ui-icon-check" style="position: relative; left: 1px; margin-top: 3px; margin-right: 60px;"/>
+                </div>
+            </h:form>
+        </f:view>
+
+        <!-- Agregar Productos -->
+
+        <p:dialog header="Agregar nuevo Producto" 
+                  widgetVar="Add" 
+                  modal="true" 
+                  showEffect="fade" 
+                  hideEffect="fade" 
+                  resizable="false"
+                  width="42%"
+                  height="80%"
+                  draggable="false">
+
+            <h:form id="frmProd">
+                <p:panelGrid  columns="2" style="border-style:hidden">
+                    <p:outputLabel  for="categoria" value="Categoria: " />
+                    <p:selectOneMenu id="categoria" value="#{frmproductos.idCategoria}" style="width:125px">
+                        <f:selectItems value="#{frmOrden.categorias}" var="ct" itemLabel="#{ct.nombre}" itemValue="#{ct.idCategoria}"/>
+                    </p:selectOneMenu>
+                    <p:outputLabel  for="nombre" value="Nombre: "/>
+
+                    <p:inputText id="nombre" value="#{frmproductos.nombre}"/>
+                    <p:outputLabel  for="precio" value="Precio: "/>
+                    <p:inputNumber  id="precio"  value="#{frmproductos.precio}" minValue="0.00" decimalPlaces="2" placeholder="0.00"/>
+
+                    <p:outputLabel for="area" value="Enviar a: " />
+                    <p:selectOneRadio id="area" value="#{frmproductos.area}">
+                        <f:selectItem itemLabel="Cocina" itemValue="C" />
+                        <f:selectItem itemLabel="Bebida" itemValue="B" />
+                    </p:selectOneRadio>
+                    <p:commandButton  value="Cancelar" icon="ui-icon-close" update=":menu :form" oncomplete="PF('Add').hide()">
+                    </p:commandButton>
+                    <p:commandButton  value="Guardar"  icon="ui-icon-check">
+                        <p:ajax process="@all" listener="#{frmproductos.crearProducto()}" update=":menu :form :messages" oncomplete="PF('Add').hide()"/>
+                    </p:commandButton>
+                </p:panelGrid>
+            </h:form>
+        </p:dialog> 
+
+        <!-- Editar Productos -->
+
+        <p:dialog header="Detalles del producto" 
+                  widgetVar="EditProd" 
+                  modal="true" 
+                  showEffect="fade" 
+                  hideEffect="fade" 
+                  resizable="false"
+                  width="42%"
+                  draggable="false">
+
+            <h:form id="frmEditProd">
+                <p:panelGrid  columns="2" style="border-style:hidden">
+                    <p:outputLabel  for="categoria" value="Categoria: " />
+                    <p:selectOneMenu id="categoria" value="#{frmproductos.idCategoria}" style="width:125px">
+                        <f:selectItems value="#{frmOrden.categorias}" var="ct" itemLabel="#{ct.nombre}" itemValue="#{ct.idCategoria}"/>
+                    </p:selectOneMenu>
+                    <p:outputLabel  for="nombre" value="Nombre: "/>
+
+                    <p:inputText id="nombre" value="#{frmproductos.nombre}"/>
+                    <p:outputLabel  for="precio" value="Precio: "/>
+                    <p:inputNumber  id="precio"  value="#{frmproductos.precio}" minValue="0.00" decimalPlaces="2" placeholder="0.00"/>
+                    <p:outputLabel for="area" value="Enviar a: " />
+                    <p:selectOneRadio id="area" value="#{frmproductos.area}">
+                        <f:selectItem itemLabel="Cocina" itemValue="C" />
+                        <f:selectItem itemLabel="Bebida" itemValue="B" />
+                    </p:selectOneRadio>
+                    <p:commandButton  value="Cancelar" icon="ui-icon-close" update=":menu :form">
+                    </p:commandButton>
+                    <p:commandButton  value="Actualizar"  icon="ui-icon-check">
+                        <p:ajax process="@all" listener="#{frmproductos.editarProducto()}" update=":menu :form :messages" oncomplete="PF('EditProd').hide()"/>
+                    </p:commandButton>
+                    <p:commandButton  value="Eliminar"  icon="ui-icon-check">
+                        <p:ajax process="@all" listener="#{frmproductos.eliminarProducto()}" update=":menu :form :messages" oncomplete="PF('EditProd').hide()"/>
+                    </p:commandButton>
+                </p:panelGrid>
+            </h:form>
+        </p:dialog> 
+
+
+        <!-- Administrar Categorias -->
+
+        <p:dialog header="Administracion de Categorias" 
+                  widgetVar="Categorias" 
+                  modal="true" 
+                  showEffect="fade" 
+                  hideEffect="fade" 
+                  resizable="false"
+                  width="52%"
+                  draggable="false">
+
+            <h:form id="frmCate">
+                <p:dataTable id="categorias"
+                             var="categoria" 
+                             value="#{frmproductos.categorias}" 
+                             scrollable="true"
+                             scrollHeight="370"
+                             emptyMessage="No se encontraron categorias"
+                             selectionMode="single"
+                             selection="#{frmproductos.categoria}"
+                             rowKey="#{categoria.idCategoria}"
+                             style="width: 500px">
+
+                    <p:ajax event="rowSelect" listener="#{frmproductos.onRowSelectCategoria}" update=":frmEditCate" oncomplete="PF('EditCate').show()"/>
+
+                    <f:facet name="header" >
+                        <p:outputPanel style="padding: 0.5%">
+                            <h:outputText value="Categorias" style="font-size: larger"/> 
+                        </p:outputPanel>
+                    </f:facet>
+                    <p:column headerText="Nombre">
+                        <h:outputText value="#{categoria.nombre}" />
+                    </p:column>
+                </p:dataTable>
+                <div align="right" style="position: relative;  margin-left:0%; border: 2px solid #654b24; border-radius: 25px; width: 490px; height: 50px">
+                    <p:panelGrid columns="3" style="margin-right: 100px; margin-top: 2px">
+                        <p:commandButton value="Agregar Nueva" oncomplete="PF('AddCate').show()" icon="ui-icon-plus">
+                            <p:ajax listener="#{frmproductos.nuevaCat()}"/>
+                        </p:commandButton>
+                        <p:commandButton value="Salir" oncomplete="PF('Categorias').hide()" update=":menu :form" icon="ui-icon-close"/>
+                    </p:panelGrid>
+                </div>
+            </h:form>
+        </p:dialog>
+
+        <!-- Editar Categoria -->
+
+        <p:dialog  header="Editar Categoria" 
+                   widgetVar="EditCate" 
+                   modal="true" 
+                   showEffect="fade" 
+                   hideEffect="fade" 
+                   resizable="false"
+                   width="32%"
+                   draggable="false">
+            <h:form id="frmEditCate">
+                <p:outputLabel  for="nombreCat" value="Nombre: "/>
+                <p:spacer width="5px"/>
+
+                <p:inputText id="nombreCat" value="#{frmproductos.nombre}" placeholder="Nombre de la Categoria"/>
+                <p:spacer/>
+                <p:panelGrid columns="2">
+                    <p:commandButton value="Cancelar" oncomplete="PF('EditCate').hide()"/>
+                    <p:commandButton value="Actualizar" oncomplete="PF('EditCate').hide()">
+                        <p:ajax process="@all" listener="#{frmproductos.editarCategoria()}" update=":frmCate :messages"/>
+                    </p:commandButton>
+                    <p:commandButton value="Eliminar" oncomplete="PF('EditCate').hide()">
+                        <p:ajax process="@all" listener="#{frmproductos.eliminarCategoria()}" update=":frmCate :messages"/>
+                    </p:commandButton>
+                </p:panelGrid>
+            </h:form>
+
+        </p:dialog>
+
+        <!-- Nueva Categoria -->
+
+        <p:dialog  header="Agregar Categorias" 
+                   widgetVar="AddCate" 
+                   modal="true" 
+                   showEffect="fade" 
+                   hideEffect="fade" 
+                   resizable="false"
+                   width="32%"
+                   draggable="false">
+            <h:form id="frmNewCat">
+                <p:outputLabel  for="nombreCat" value="Nombre: "/>
+                <p:spacer width="5px"/>
+
+                <p:inputText id="nombreCat" value="#{frmproductos.nombre}" placeholder="Nombre de la Categoria"/>
+                <p:spacer/>
+                <p:panelGrid columns="2" style="margin-top: 20px">
+                    <p:commandButton value="Cancelar" oncomplete="PF('AddCate').hide()" icon="ui-icon-close"/>
+                    <p:commandButton value="Guardar" oncomplete="PF('AddCate').hide()" icon="ui-icon-check">
+                        <p:ajax process="@all" listener="#{frmproductos.crearCategoria()}" update=":frmCate :messages"/>
+                    </p:commandButton>
+                </p:panelGrid>
+            </h:form>
+
+        </p:dialog>
+
+    </h:body>
+</html>
+

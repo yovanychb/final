@@ -1,0 +1,23 @@
+.tblOrdenes{
+    width: 90%; 
+    padding-left: 8%;
+    padding-top: 1.5%; 
+    padding-bottom: 2%
+}
+
+.frmMenu{
+    position: absolute;
+    left: 0.5%;
+    top: 2%;
+    right: 1%; 
+    width: 30%
+}
+
+.frmProductos{
+    position: absolute;
+    left: 28%;
+    top:2%;
+    right: 2%;
+    width: 70%;
+    
+}

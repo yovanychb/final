@@ -1,0 +1,48 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+    <h:head>
+        <title>ResBar</title>
+        <meta content='text/html; charset=UTF-8' http-equiv="Content-Type"/>
+    </h:head>
+    <h:body>
+        <f:view>
+
+
+            <h:form id="frm">
+                <p:growl id="msg"/>
+                <h1><h:outputText value="Create/Edit"/></h1>
+                <p:panelGrid columns="2">
+                    <p:outputLabel value="IdProducto:" for="idProducto" />
+                    <p:inputText id="idProducto" value="#{frmproductos.producto.idProducto}" title="IdProducto" required="true" requiredMessage="The IdProducto field is required."/>
+                    <p:outputLabel value="Nombre:" for="nombre" />
+                    <p:inputText id="nombre" value="#{frmproductos.producto.nombre}" title="Nombre" required="true" requiredMessage="The Nombre field is required."/>
+                    <p:outputLabel value="Precio:" for="precio" />
+                    <p:inputText id="precio" value="#{frmproductos.producto.precio}" title="Precio" required="true" requiredMessage="The Precio field is required."/>
+                    <p:outputLabel value="Area:" for="area" />
+                    <p:selectOneRadio id="area" value="#{frmproductos.producto.area}">
+                        <f:selectItem itemLabel="Cocina" itemValue="C" />
+                        <f:selectItem itemLabel="Bebida" itemValue="B" />
+                    </p:selectOneRadio>
+                    <p:outputLabel value="IdCategoria:" for="idCategoria" />
+                    <p:selectOneMenu id="idCategoria" value="#{frmproductos.idCategoria}" style="width:125px"  required="true" requiredMessage="The IdCategoria field is required.">
+                        <f:selectItems value="#{frmOrden.categorias}" var="ct" itemLabel="#{ct.nombre}" itemValue="#{ct.idCategoria}"/>
+                    </p:selectOneMenu>
+                    
+                    <p:commandButton  value="Cancelar" icon="ui-icon-close" update="@all">
+                    </p:commandButton>
+                    <p:commandButton  value="Guardar"  icon="ui-icon-check">
+                        <p:ajax process="@all" listener="#{frmproductos.crearProducto()}" update=":frm:msg"/>
+                    </p:commandButton>
+                </p:panelGrid>
+                
+            </h:form>
+        </f:view>
+        
+        
+    </h:body>
+</html>

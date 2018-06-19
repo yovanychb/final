@@ -1,0 +1,503 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="en"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+    <h:head>
+        <title>ResBar</title>
+        <meta content='text/html; charset=UTF-8' http-equiv="Content-Type"/>
+        <link href="resources/css/estilos.css" rel="stylesheet" type="text/css" media="all" />
+        <link rel="stylesheet" href="resources/font-awesome/css/font-awesome.min.css" type="text/css" media="all" />
+        <link rel="stylesheet" href="resources/bootstrap/css/bootstrap.min.css" type="text/css" media="all" />
+        <link rel="stylesheet" href="resources/css/style.default.css" type="text/css" media="all"/>
+        <link rel="stylesheet" href="resources/css/custom.css" type="text/css" media="all" />
+        <link rel="stylesheet" href="resources/css/inicio.css" type="text/css" media="all" />
+    </h:head>
+
+    <h:body style="background-color: #c0a16b">
+        <f:view>
+            <h:form id="form">
+                <p:spacer/>
+                <p:menubar style="font-size: larger; height: 60px;width: 98%;left: 1%; align-content: center">
+                    <p:menuitem value=" Home" icon="ui-icon-home" url="inicio.html"/>
+                </p:menubar>
+                <p:spacer/> 
+                <p:growl id="messages" showDetail="true"/>
+                <div align="right" style="padding-right: 11%; ">
+                    <p:commandButton actionListener="#{frmOrden.nueva()}" value="Agregar Orden" icon="ui-icon-plusthick">
+                    </p:commandButton>
+                </div>
+                <p:spacer></p:spacer>
+                <p:dataTable id="ordenes"
+                             var="orden" 
+                             value="#{frmOrden.ordenes}" 
+                             widgetVar="tblOrdenes"
+                             emptyMessage="No se encontraron ordenes activas"
+                             selectionMode="single"
+                             scrollable="true"
+                             scrollHeight="400"
+                             selection="#{frmOrden.orden}"
+                             rowKey="#{orden.idOrden}"
+                             filteredValue="#{frmOrden.filtro}"
+                             styleClass="tblOrdenes">
+
+                    <p:ajax event="rowSelect" listener="#{frmOrden.onRowSelect}" oncomplete="PF('Options').show()" update=":frmOpciones"/>
+
+                    <f:facet name="header" >
+                        <p:outputPanel style="padding: 0.5%; border-bottom-style: dotted">
+                            <h:outputText value="Ordenes Activas" style="font-size: larger"/> 
+                        </p:outputPanel>
+                    </f:facet>
+                    <f:facet name="header">
+                        <p:outputPanel style="padding: 0.5%">
+                            <h:outputText value="Buscar Orden:  " />
+                            <p:inputText id="globalFilter" onkeyup="PF('tblOrdenes').filter()" style="width:20%" placeholder="Buscar orden..."/>
+                        </p:outputPanel>
+                    </f:facet>
+                    <p:column headerText="Numero" filterBy="#{orden.idOrden}" filterStyle="display:none" filterMatchMode="exact" style="width: 80px">
+                        <h:outputText value="#{orden.idOrden}" />
+                    </p:column>
+                    <p:column headerText="Mesa" filterBy="#{orden.mesa}" filterStyle="display:none" filterMatchMode="exact" style="width: 90px">
+                        <h:outputText value="#{orden.mesa}" />
+                    </p:column>
+                    <p:column headerText="Mesero" filterBy="#{orden.mesero}" filterStyle="display:none" filterMatchMode="exact">
+                        <h:outputText value="#{orden.mesero}" />
+                    </p:column>
+                    <p:column headerText="Cliente" filterBy="#{orden.cliente}" filterStyle="display:none" filterMatchMode="exact">
+                        <h:outputText value="#{orden.cliente}" />
+                    </p:column>
+                    <p:column headerText="Comentario" filterBy="#{orden.comentario}" filterStyle="display:none" filterMatchMode="exact">
+                        <h:outputText value="#{orden.comentario}" />
+                    </p:column>
+                    <p:column headerText="Total">
+                        <h:outputText value="#{orden.total}" >
+                            <f:convertNumber currencySymbol="$ " type="currency"/>
+                        </h:outputText>
+                    </p:column>
+                </p:dataTable>
+            </h:form>
+        </f:view>
+
+
+        <!-- Dialogo de Opciones -->
+
+        <p:dialog header="Opciones de la orden #{frmOrden.orden.idOrden}" 
+                  widgetVar="Options" 
+                  modal="true"
+                  showEffect="fade" 
+                  hideEffect="fade" 
+                  resizable="false"
+                  width="70%"
+                  draggable="false">
+            <h:form id="frmOpciones">
+                <h:outputLabel value="No.: #{frmOrden.orden.idOrden} ----- Cliente: #{frmOrden.orden.cliente} ----- Mesa: #{frmOrden.orden.mesa}"/>
+                <p:panelGrid  columns="4" style="border-style:hidden">
+                    <p:commandButton value="Agregar Productos" id="agregar" icon="ui-icon-plus" oncomplete="PF('Add').show()"/>
+                    <p:commandButton  value="Imprimir Cuenta" icon="ui-icon-print">
+                        <p:ajax process="@this" listener="#{frmOrden.imprimir()}"/> 
+                    </p:commandButton>
+                    <p:commandButton value="Modificar Cuenta" id="modificar" icon="ui-icon-pencil" oncomplete="PF('Added').show()" update=":frm"/>
+                    <p:commandButton value="Cobrar" id="cobrar" icon="ui-icon-check" oncomplete="PF('Imprimir').show()" update=":fact"/>
+                </p:panelGrid>
+            </h:form>
+        </p:dialog>
+
+
+        <!-- Cobrar Orden -->
+
+        <p:dialog header="Cobrar Orden #{frmOrden.orden.idOrden}" 
+                  widgetVar="Cobrar" 
+                  modal="true" 
+                  showEffect="fade" 
+                  hideEffect="fade" 
+                  resizable="false"
+                  width="42%"
+                  draggable="false">
+
+            <h:form id="frmCobrar" >
+                <p:panelGrid  columns="2" style="border-style: hidden">                    
+                    <p:outputLabel  for="total" value="Total: "/>
+                    <p:inputText disabled="true" id="total" value="#{frmOrden.orden.total}"/>
+                    <p:outputLabel  for="efectivo" value="Efectivo: "/>
+                    <p:inputText id="efectivo" value="#{frmOrden.efect}" placeholder="0.00">
+                        <p:keyFilter regEx="/[\d\.]/"/>
+                        <p:ajax event="keyup" listener="#{frmOrden.cambio()}" update=":frmCobrar:cambio :frmCobrar:efectivo :frmCobrar:pnl" />
+                    </p:inputText>
+                    <p:outputLabel for="cambio" value="Cambio: "/>
+                    <p:inputNumber disabled="true" id="cambio" value="#{frmOrden.cambio}" decimalPlaces="2"/>    
+                </p:panelGrid>
+                <p:panelGrid  id="pnl" columns="2" style="border-style: hidden">
+
+                    <p:commandButton  value="Cancelar" icon="ui-icon-close" oncomplete="PF('Cobrar').hide()" update=":frmOpciones">
+                    </p:commandButton>
+
+                    <p:commandButton process="@this" id="btnCobrar" rendered="#{frmOrden.btnCobrar}" value="Cobrar" icon="ui-icon-check" update=":form:ordenes">
+                        <p:ajax listener="#{frmOrden.cobrar()}" />
+                    </p:commandButton>
+
+                </p:panelGrid>
+            </h:form>
+        </p:dialog>
+
+
+        <!-- Imprimir Ticket -->
+
+        <p:dialog header="Imprimir Ticket" 
+                  widgetVar="Imprimir" 
+                  modal="true" 
+                  showEffect="fade" 
+                  hideEffect="fade" 
+                  resizable="false"
+                  width="55%"
+                  height="600"
+                  draggable="false"
+                  >
+
+            <h:form id="fact" style="position: absolute;">
+
+                <p:dataTable value="#{frmOrden.orden.detalleOrdenList}"
+                             var="det"
+                             style="width: 97%; border: none;border-width: 0;border-color: transparent">
+                    <f:facet name="header">
+                        CUENTA
+                    </f:facet>  
+                    <p:columnGroup type="header">
+                        <p:row style="height: 20px; text-align: start">
+                            <p:column headerText="No. Orden:" />
+                            <p:column headerText="#{frmOrden.orden.idOrden}" />
+                            <p:column headerText="Fecha:" />
+                            <p:column headerText="#{frmOrden.fecha()}" />
+                        </p:row>
+                        <p:row style="height: 20px;">
+                            <p:column headerText="Cliente:"/>
+                            <p:column headerText="#{frmOrden.orden.cliente}"/>                         
+                            <p:column colspan="2" headerText=""/>                         
+                        </p:row>
+                        <p:row style="height: 20px;">
+                            <p:column headerText="Mesa:" />
+                            <p:column headerText="#{frmOrden.orden.mesa}" />
+                            <p:column headerText="Hora:" />
+                            <p:column headerText="#{frmOrden.hora()}" />
+                        </p:row>
+                        <p:row style="height: 20px"/>
+                        <p:row style="height: 20px;">
+                            <p:column headerText="CONCEPTO"/>
+                            <p:column headerText="CANTIDAD" style="width: 20%"/>
+                            <p:column headerText="P/UNIT"/>
+                            <p:column headerText="SUBTOTAL"/>
+                        </p:row>
+                    </p:columnGroup>
+                    <p:column headerText="CONCEPTO">
+                        <h:outputText value="#{det.producto.nombre}"/>
+                    </p:column>
+                    <p:column headerText="CANTIDAD" style="width: 20%">
+                        <h:outputText value="#{det.cantidad}"/>
+                    </p:column>
+                    <p:column headerText="P/UNIT">
+                        <h:outputText value="#{det.producto.precio}"/>
+                    </p:column>
+                    <p:column headerText="SUBTOTAL">
+                        <h:outputText value="#{det.producto.precio * det.cantidad}"/>
+                    </p:column>
+                    <f:facet name="footer" >
+                        <p:outputPanel style="text-align: right" >
+                            <h:outputText value="Total: $ #{frmOrden.orden.total}" />
+
+                        </p:outputPanel>
+                    </f:facet>
+                </p:dataTable>
+            </h:form>
+
+            <h:form id="frmImprimir" style="padding-top: 500px;">
+                <div align="right" style="position: relative; margin-left: 5px; border: 2px solid #654b24; border-radius: 25px; width: 521px;">
+                    <p:panelGrid columns="3" style="background-color: #c0a16b; position: relative; padding-top: 300px; margin-right: 4%; width: 479px;"> 
+                        <p:commandButton  value="Cancelar" icon="ui-icon-close" oncomplete="PF('Imprimir').hide()" update=":frmOpciones">
+                        </p:commandButton>
+                        <p:commandButton  value="Imprimir" icon="ui-icon-print" >
+                            <p:ajax process="@this" listener="#{frmOrden.imprimir()}"/> 
+                        </p:commandButton>
+                        <p:commandButton value="Cobrar" oncomplete="PF('Cobrar').show();PF('Imprimir').hide()" update="frmCobrar"/>
+                    </p:panelGrid>
+                </div>
+            </h:form>
+        </p:dialog>
+
+
+        <!-- Agregar Productos -->
+
+
+        <p:dialog header="Agregar Productos"
+                  position="center"
+                  widgetVar="Add" 
+                  modal="true" 
+                  showEffect="fade" 
+                  hideEffect="fade" 
+                  resizable="false"
+                  width="100%"
+                  height="550"
+                  draggable="false">
+
+            <h:form id="menu" styleClass="frmMenu" >
+                <nav class="side-navbar">
+                    <div class="sidebar-header d-flex align-items-center">
+                        <div class="avatar"><img src="resources/img/titulo.jpg" alt="..." class="img-fluid rounded-circle"/></div>
+                        <div class="title, titulo">
+                            <h1 class="h4"> Fraga Caffe</h1>
+                        </div>
+                    </div>
+                    <p:dataTable value="#{frmOrden.categorias}" 
+                                 var="item"
+                                 selection="#{frmCategorias.categoria}"
+                                 selectionMode="single"
+                                 rowKey="#{item.idCategoria}"
+                                 style="padding-left: 2%">
+                        <p:ajax event="rowSelect" listener="#{frmOrden.onRowSelectCategoria}" update=":frmProductos"/>   
+                        <p:column headerText="CATEGORIAS">
+                            <li class="fa fa-cutlery espacio-icono"><h:outputText class="espacio-menu"  value="#{item.nombre}"/></li>
+                        </p:column>
+                    </p:dataTable>
+                </nav>
+            </h:form>
+
+            <h:form id="frmProductos" styleClass="frmProductos">
+                <p:dataTable id="products"
+                             widgetVar="tblProductos"
+                             filteredValue="#{frmOrden.fake2}"
+                             var="productos" 
+                             value="#{frmOrden.fakeAgregar}" 
+                             scrollable="true"
+                             scrollHeight="380"
+                             emptyMessage="No se encontraron productos"
+                             selectionMode="single"
+                             selection="#{frmOrden.fakeel}"
+                             rowKey="#{productos.producto.idProducto}"
+                             style="padding-bottom: 2%;padding-right: 3%">
+
+                    <p:ajax event="rowSelect" listener="#{frmOrden.agregarProductosAdd}" update="@this"/>
+
+                    <f:facet name="header">
+                        <p:outputPanel style="padding: 0.5%">
+                            <h:outputText value="Buscar Producto:  " />
+                            <p:inputText id="globalFilter" onkeyup="PF('tblProductos').filter()" style="width:20%" placeholder="Buscar producto..."/>
+                        </p:outputPanel>
+                    </f:facet>
+                    <p:column headerText="Nombre" filterBy="#{productos.producto.nombre}" filterStyle="display:none" filterMatchMode="exact">
+                        <h:outputText value="#{productos.producto.nombre}" />
+                    </p:column>
+                    <p:column headerText="Precio">
+                        <h:outputText value="#{productos.producto.precio}" />
+                    </p:column>
+                    <p:column headerText="Cantidad">
+                        <p:outputLabel id="cantidad" value="#{productos.cantidad}"/>
+                    </p:column>
+                    <p:column headerText="" style="width: 17%">
+                        <p:commandButton value="-">
+                            <p:ajax listener="#{frmOrden.quitarProductosAdd(productos)}" update=":frmProductos"/>
+                        </p:commandButton>
+                    </p:column>
+                </p:dataTable>
+                <div align="right" style="position: relative; border: 2px solid #654b24; border-radius: 25px; width: 700px;">
+                    <p:panelGrid columns="3" style="background-color: #c0a16b; position: relative; padding-top: 300px; margin-right: 3%; width: 500px; padding-left: 5%">
+                        <p:commandButton value="Cancelar" oncomplete="PF('Add').hide()" icon="ui-icon-close" update="frmProductos"/>
+                        <p:commandButton value="Hecho" oncomplete="PF('Add').hide();PF('Options').hide()" icon="ui-icon-check">
+                            <p:ajax process="@this" listener="#{frmOrden.editarOrdenAdd()}" update=":form:ordenes :form:messages"/>
+                        </p:commandButton>
+                    </p:panelGrid>
+                </div>
+            </h:form>
+        </p:dialog>
+
+
+        <!-- Editar Orden -->
+
+        <p:dialog header="Productos Agregados"
+                  position="center"
+                  widgetVar="Added" 
+                  modal="true" 
+                  showEffect="fade" 
+                  hideEffect="fade" 
+                  resizable="false"
+                  width="100%"
+                  height="550"
+                  draggable="false">
+            <h:form id="frm">
+                <div class="columna">
+                    <h:panelGrid id="grid" columns="2" class="datos" style="padding-left: 3%">
+                        <p:outputLabel  for="mesa" value="Mesa: " class="qq"/>
+                        <p:inputText id="mesa" value="#{frmOrden.orden.mesa}"/>
+
+                        <p:outputLabel  for="mesero" value="Mesero: " class="qq"/>
+                        <p:inputText id="mesero" value="#{frmOrden.orden.mesero}"/>
+
+                        <p:outputLabel  for="cliente" value="Cliente:" class="qq"/>
+                        <p:inputText  id="cliente"  value="#{frmOrden.orden.cliente}" />
+
+                        <p:outputLabel  for="comentario" value="Comentario:" class="qq"/>
+                        <p:inputTextarea  id="comentario"  value="#{frmOrden.orden.comentario}"/>
+
+                        <p:outputLabel  for="fecha" value="Fecha:" class="qq"/>
+                        <p:outputLabel id="fecha" value="#{frmOrden.fecha()}" class="qq"/>
+
+                    </h:panelGrid>
+                </div>
+                <div style="position: absolute; right: 74%; top: 52%">
+                    <p:commandButton class="boton" value="Agregar Productos" oncomplete="PF('Add2').show()" icon="ui-icon-plusthick" update=":frmProductos2:products2">
+
+                    </p:commandButton>
+                </div>
+                <!-- </h:form>
+     
+                 <h:form id="frm" style="padding-top: 1%"> -->
+                <div style="height: 300px">
+                    <p:dataTable id="detalleOrden"
+                                 var="productoo" 
+                                 value="#{frmOrden.detalle}" 
+                                 emptyMessage="No se encontraron ordenes activas"
+                                 selectionMode="single"
+                                 sortBy="#{productoo.producto.idProducto}"
+                                 selection="#{frmOrden.detail}"
+                                 rowKey="#{productoo.producto.idProducto}"
+                                 style="width: 95%; padding-left: 37%;padding-top: 1.5%; padding-bottom: 2%">
+
+                        <f:facet name="header">
+                            <h:outputText value="Productos de la orden"/>                                  
+                        </f:facet>
+                        <p:column headerText="Producto" >
+                            <h:outputText value="#{productoo.producto.nombre}" />
+                        </p:column>
+                        <p:column headerText="Cantidad" style="width:150px">
+                            <p:commandButton value="-">
+                                <p:ajax listener="#{frmOrden.quitarProductosDetalle(productoo)}" update=":frm:detalleOrden"/>
+                            </p:commandButton>
+                            <p:spacer/>
+                            <h:outputText id="cantidad" value="#{productoo.cantidad}"/>
+                            <p:spacer/>
+                            <p:commandButton value="+">
+                                <p:ajax listener="#{frmOrden.agregarProductosDetalle(productoo)}" update=":frm"/>
+                            </p:commandButton>                        
+                        </p:column>
+                        <p:column headerText="Total" style="width: 15%">
+                            <h:outputText value="#{productoo.producto.precio*productoo.cantidad}" >
+                                <f:convertNumber type="currency" currencySymbol="$" />
+                            </h:outputText> 
+                        </p:column>
+                        <p:column headerText="" style="width: 17%">
+                            <p:commandButton value="Eliminar">
+                                <p:ajax listener="#{frmOrden.quitarCompleto(productoo)}" update=":frm"/>
+                            </p:commandButton>
+                        </p:column>
+
+                        <f:facet name="footer" >
+                            <p:outputPanel style="text-align: right" >
+                                <h:outputText value="Total: $ #{frmOrden.orden.total}" />
+
+                            </p:outputPanel>
+                        </f:facet>
+
+                    </p:dataTable>
+                    <div align="right" style="position: relative;  margin-left:37%; border: 2px solid #654b24; border-radius: 25px; width: 570px; height: 50px">
+                        <p:panelGrid columns="3" style="background-color: #c0a16b; position: relative; padding-top: 180px; margin-right: 5%; width: 500px; padding-left: 5%">
+                            <p:commandButton  value="Cancelar" oncomplete="PF('Added').hide()" icon="ui-icon-close">
+                            </p:commandButton>
+                            <p:commandButton value="Eliminar" oncomplete="PF('Added').hide();PF('Options').hide()" icon="ui-icon-close">
+                                <p:ajax process="@all" listener="#{frmOrden.eliminarOrden()}" update=":form:ordenes"/>
+                            </p:commandButton>
+                            <p:commandButton value="Guardar" oncomplete="PF('Added').hide();PF('Options').hide()" icon="ui-icon-check">
+                                <p:ajax process="@all" listener="#{frmOrden.editarOrden()}" update=":form:ordenes"/>
+                            </p:commandButton>
+                        </p:panelGrid>
+
+                    </div>
+                </div>
+            </h:form> 
+        </p:dialog>
+
+        <p:dialog header="Agregar Prductos"
+                  position="center"
+                  widgetVar="Add2" 
+                  modal="true" 
+                  showEffect="fade" 
+                  hideEffect="fade" 
+                  resizable="false"
+                  width="100%"
+                  height="550"
+                  draggable="false">
+
+            <h:form id="menu2" styleClass="frmMenu" >
+                <nav class="side-navbar">
+                    <div class="sidebar-header d-flex align-items-center">
+                        <div class="avatar"><img src="resources/img/titulo.jpg" alt="..." class="img-fluid rounded-circle"/></div>
+                        <div class="title, titulo">
+                            <h1 class="h4">Fraga Caffe</h1>
+                        </div>
+                    </div>
+                    <p:dataTable value="#{frmOrden.categorias}" 
+                                 var="item"
+                                 selection="#{frmCategorias.categoria}"
+                                 selectionMode="single"
+                                 rowKey="#{item.idCategoria}"
+                                 >
+                        <p:ajax event="rowSelect" listener="#{frmOrden.onRowSelectCategoria}" update=":frmProductos2"/>   
+
+                        <p:column headerText="CATEGORIAS">
+
+                            <li class="fa fa-cutlery espacio-icono"><h:outputText class="espacio-menu"  value="  #{item.nombre}"/></li>
+                        </p:column>
+                    </p:dataTable>
+                </nav>
+            </h:form>
+            <h:form id="frmProductos2" styleClass="frmProductos">
+                <p:dataTable id="products2"
+                             var="productos" 
+                             widgetVar="tblProductos2"
+                             value="#{frmOrden.fake}" 
+                             scrollable="true"
+                             scrollHeight="380"
+                             emptyMessage="No se encontraron productos"
+                             selectionMode="single"
+                             selection="#{frmOrden.fakeel}"
+                             filteredValue="#{frmOrden.fake2}"
+                             rowKey="#{productos.producto.idProducto}"
+                             style="padding-bottom: 2%;">
+
+                    <p:ajax event="rowSelect" listener="#{frmOrden.agregarProductos}" update=":frmProductos2"/>
+
+                    <f:facet name="header">
+                        <p:outputPanel style="padding: 0.5%">
+                            <h:outputText value="Buscar Producto:  " />
+                            <p:inputText id="globalFilter" onkeyup="PF('tblProductos2').filter()" style="width:20%" placeholder="Buscar producto..."/>
+                        </p:outputPanel>
+                    </f:facet>
+                    <p:column headerText="Nombre" filterBy="#{productos.producto.nombre}" filterStyle="display:none" filterMatchMode="exact">
+                        <h:outputText value="#{productos.producto.nombre}" />
+                    </p:column>
+                    <p:column headerText="Precio">
+                        <h:outputText value="#{productos.producto.precio}" />
+                    </p:column>
+                    <p:column headerText="Cantidad">
+                        <p:outputLabel id="cantidad" value="#{productos.cantidad}"/>
+                    </p:column>
+                    <p:column headerText="" style="width: 17%">
+                        <p:commandButton value="-">
+                            <p:ajax listener="#{frmOrden.quitarProductos(productos)}" update=":frmProductos2"/>
+                        </p:commandButton>
+                    </p:column>
+                </p:dataTable>
+                <div align="right" style="position: relative; margin-left: 18%;  border: 2px solid #654b24; border-radius: 25px; width: 570px;">
+                    <p:panelGrid columns="3" style="background-color: #c0a16b; position: relative; padding-top: 300px; margin-right: 3%; width: 500px; padding-left: 5%">
+                        <p:commandButton value="Cancelar" oncomplete="PF('Add2').hide()" icon="ui-icon-close" update="frmProductos2"/>
+                        <p:commandButton value="Hecho" oncomplete="PF('Add2').hide()" icon="ui-icon-check">
+                            <p:ajax update=":frm"/>
+                        </p:commandButton>
+                    </p:panelGrid>
+                </div>
+            </h:form>
+        </p:dialog>
+    </h:body>
+
+</html>
+
